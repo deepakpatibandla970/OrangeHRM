@@ -22,6 +22,7 @@ public class DashboardPage extends BasePage implements IPage {
 
     public PIMPage navigateToPIM()          { click(sidebarMenu("PIM"));   return new PIMPage(driver); }
     public AdminPage navigateToAdmin()      { click(sidebarMenu("Admin")); return new AdminPage(driver); }
+    public LeavePage navigateToLeave()       { click(sidebarMenu("Leave"));  return new LeavePage(driver);}
 
     public LoginPage logout() {
         click(userDropdown);

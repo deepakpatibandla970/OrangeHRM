@@ -103,6 +103,7 @@ public abstract class BasePage {
     }
 
     // ==================== SHADOW DOM SUPPORT ====================
+
     /**
      * Pierce one or more shadow roots.
      * Pass selectors top-down: outer host -> inner host -> ... -> target.
@@ -130,5 +131,6 @@ public abstract class BasePage {
 
     public void switchToDefaultContent() {
         driver.switchTo().defaultContent();
+
     }
 }
