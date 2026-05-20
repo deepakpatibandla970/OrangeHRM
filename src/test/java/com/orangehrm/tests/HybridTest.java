@@ -28,17 +28,30 @@ public class HybridTest extends BaseTest {
                 "src/test/resources/testdata/LoginData.xlsx", "Employees");
     }
 
-    @Test(dataProvider = "employees",
-            description = "POM + Data-Driven combined hybrid scenario")
-    public void testEmployeeSearchHybrid(String empId, String expected) {
-        // POM phase
+    @Test(dataProvider = "employees")
+    public void testEmployeeSearchHybrid(
+            String empId,
+            String expected) {
+
         DashboardPage dash = new LoginPage(driver)
-                .loginAs(ConfigReader.get("username"), ConfigReader.get("password"));
+                .loginAs(
+                        ConfigReader.get("username"),
+                        ConfigReader.get("password")
+                );
+
         PIMPage pim = dash.navigateToPIM();
 
-        boolean found = pim.findEmployeeAcrossAllPages(empId);
-        Assert.assertEquals(String.valueOf(found), expected,
-                "Mismatch for empId: " + empId);
+        boolean found =
+                pim.findEmployeeAcrossAllPages(empId);
+
+        System.out.println("Employee ID: " + empId);
+        System.out.println("Found Status: " + found);
+
+        Assert.assertEquals(
+                String.valueOf(found),
+                expected,
+                "Mismatch for empId: " + empId
+        );
     }
 
     @Test(description = "Hybrid: keyword-driven login + POM-driven assertions")
