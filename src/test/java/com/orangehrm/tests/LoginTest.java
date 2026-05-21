@@ -10,14 +10,18 @@ import org.testng.annotations.Test;
 public class LoginTest extends BaseTest {
 
     @Test(description = "Valid login leads to dashboard")
-    public void testValidLogin() {
+    public void testValidLogin() throws InterruptedException {
         LoginPage login = new LoginPage(driver);
-        Assert.assertTrue(login.isPageLoaded(), "Login page did not load");
+        Thread.sleep(4000);
+        Assert.assertTrue(login.isPageLoaded(),
+                "Login page did not load");
 
         DashboardPage dash = login.loginAs(
                 ConfigReader.get("username"),
                 ConfigReader.get("password"));
+        Thread.sleep(4000);
 
+        //Assert.assertTrue(dash.isAt(), "Dashboard URL not reached");
         Assert.assertTrue(dash.isAt(), "Dashboard URL not reached");
         Assert.assertEquals(dash.getHeaderText(), "Dashboard");
     }

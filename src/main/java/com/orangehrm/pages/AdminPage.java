@@ -10,7 +10,6 @@ import java.util.List;
 
 /**
  * Demonstrates DROPDOWN handling.
- *
  * OrangeHRM uses CUSTOM (non-<select>) dropdowns built with divs - the
  * Selenium 'Select' class will NOT work on them. Both styles are shown.
  */

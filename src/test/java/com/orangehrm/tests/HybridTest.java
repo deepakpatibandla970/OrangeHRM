@@ -31,7 +31,7 @@ public class HybridTest extends BaseTest {
     @Test(dataProvider = "employees")
     public void testEmployeeSearchHybrid(
             String empId,
-            String expected) {
+            String expected) throws InterruptedException {
 
         DashboardPage dash = new LoginPage(driver)
                 .loginAs(
@@ -46,6 +46,7 @@ public class HybridTest extends BaseTest {
 
         System.out.println("Employee ID: " + empId);
         System.out.println("Found Status: " + found);
+        Thread.sleep(4000);
 
         Assert.assertEquals(
                 String.valueOf(found),

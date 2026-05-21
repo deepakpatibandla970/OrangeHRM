@@ -8,7 +8,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import java.util.List;
-import org.testng.SkipException;
+//import org.testng.SkipException;
 
 public class PIMTest extends BaseTest {
 
@@ -32,17 +32,8 @@ public class PIMTest extends BaseTest {
     public void testReadEmployeeRows() {
         List<List<String>> data = pim.getEmployeeTableData();
         Assert.assertFalse(data.isEmpty(), "Employee table is empty");
-        // Each row should have at least 4 cells (Id, First, Last, Title-or-status)
         Assert.assertTrue(data.get(0).size() >= 3);
     }
-
-   /* @Test(description = "PAGINATION - navigate page 2 if available")
-    public void testPaginationToPage2() {
-        int pages = pim.getTotalPages();
-        if (pages < 2) throw new SkipException();
-        pim.goToPage(2);
-        Assert.assertFalse(pim.getEmployeeTableData().isEmpty());
-    }*/
 
 
     @Test(description = "PAGINATION - navigate page 2 if available")
@@ -60,19 +51,10 @@ public class PIMTest extends BaseTest {
 
         } else {
 
-            Assert.assertTrue(
-                    !pim.getEmployeeTableData().isEmpty(),
-                    "Single page still contains employee records"
-            );
+            Assert.assertFalse(pim.getEmployeeTableData().isEmpty(), "Single page still contains employee records");
         }
     }
 
-   /* @Test(description = "PAGINATION - search employee across all pages")
-    public void testFindEmployeeAcrossPages() {
-        // 0001 is the seeded admin user in OrangeHRM demo
-        boolean found = pim.findEmployeeAcrossAllPages("0001");
-        Assert.assertTrue(found, "Employee 0001 should be findable across pages");
-    }*/
    @Test(description = "PAGINATION - verify employee table has records")
    public void testFindEmployeeAcrossPages() {
 
@@ -93,7 +75,5 @@ public class PIMTest extends BaseTest {
        );
    }
 
-    /*private static class SkipException extends RuntimeException {
-        SkipException() { super("Not enough pagination pages to test."); }
-    }*/
+
 }

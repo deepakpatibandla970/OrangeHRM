@@ -8,19 +8,18 @@ import org.testng.annotations.Test;
 
 /**
  * MULTI-THREADING / PARALLEL test.
- *
+
  * Run with: mvn test -DsuiteXmlFile=testng.xml
  * In testng.xml the suite uses parallel="methods" thread-count="3".
- *
+
  * Each method runs on its own thread. ThreadLocal<WebDriver> in
  * DriverFactory ensures each thread gets its own browser instance and
  * the driver references never leak across threads.
- *
+
  * The 'synchronized' methods in DriverFactory protect the
  * download/initialisation critical section.
  */
 public class ParallelLoginTest extends BaseTest {
-
     @Test
     public void parallelTest1() { runLogin("Test-1"); }
 
