@@ -1,0 +1,157 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.orangehrm</groupId>
+  <artifactId>orangehrm-cucumber-framework</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <name>OrangeHRM Cucumber BDD Framework</name>
+
+  <properties>
+
+    <!-- Java -->
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- Versions -->
+    <selenium.version>4.37.0</selenium.version>
+    <cucumber.version>7.18.1</cucumber.version>
+    <testng.version>7.10.2</testng.version>
+    <allure.version>2.29.0</allure.version>
+    <aspectj.version>1.9.22</aspectj.version>
+
+    <!-- Plugins -->
+    <surefire.version>3.2.5</surefire.version>
+    <allure.maven.version>2.12.0</allure.maven.version>
+
+    <!-- Runtime -->
+    <suiteXmlFile>testng.xml</suiteXmlFile>
+    <allure.results.directory>
+      ${project.build.directory}/allure-results
+    </allure.results.directory>
+
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>io.github.bonigarcia</groupId>
+      <artifactId>webdrivermanager</artifactId>
+      <version>6.1.0</version>
+    </dependency>
+    <!-- Selenium -->
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-java</artifactId>
+      <version>${selenium.version}</version>
+    </dependency>
+
+    <!-- Cucumber -->
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-java</artifactId>
+      <version>${cucumber.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>2.0.13</version>
+    </dependency>
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-testng</artifactId>
+      <version>${cucumber.version}</version>
+    </dependency>
+
+    <!-- TestNG -->
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>${testng.version}</version>
+    </dependency>
+
+    <!-- Allure -->
+    <dependency>
+      <groupId>io.qameta.allure</groupId>
+      <artifactId>allure-cucumber7-jvm</artifactId>
+      <version>${allure.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.qameta.allure</groupId>
+      <artifactId>allure-rest-assured</artifactId>
+      <version>${allure.version}</version>
+    </dependency>
+
+    <!-- AspectJ -->
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjweaver</artifactId>
+      <version>${aspectj.version}</version>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+
+    <plugins>
+
+      <!-- Maven Compiler -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+
+        <configuration>
+          <release>${maven.compiler.release}</release>
+        </configuration>
+      </plugin>
+
+      <!-- Surefire -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.version}</version>
+
+        <configuration>
+
+          <suiteXmlFiles>
+            <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
+          </suiteXmlFiles>
+
+          <testFailureIgnore>true</testFailureIgnore>
+
+          <argLine>
+            -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
+          </argLine>
+
+          <systemPropertyVariables>
+            <allure.results.directory>
+              ${allure.results.directory}
+            </allure.results.directory>
+          </systemPropertyVariables>
+
+        </configuration>
+      </plugin>
+
+      <!-- Allure -->
+      <plugin>
+        <groupId>io.qameta.allure</groupId>
+        <artifactId>allure-maven</artifactId>
+        <version>${allure.maven.version}</version>
+
+        <configuration>
+          <reportVersion>${allure.version}</reportVersion>
+          <resultsDirectory>${allure.results.directory}</resultsDirectory>
+        </configuration>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+</project>

@@ -1,0 +1,154 @@
+# OrangeHRM – Cucumber BDD Test Automation Framework
+
+End-to-end **BDD** automation framework for the public **OrangeHRM** demo, built with
+Cucumber + Selenium + TestNG, with **Allure** reporting and a **Jenkins** pipeline.
+
+> **Application under test:** https://opensource-demo.orangehrmlive.com/
+> **Demo credentials** (published openly by OrangeHRM for their sandbox): `Admin` / `admin123`
+
+---
+
+## Tech stack
+
+| Layer            | Choice                                                        |
+|------------------|---------------------------------------------------------------|
+| Language         | Java 17                                                       |
+| BDD              | Cucumber 7.18.1 (`cucumber-java`, `cucumber-testng`)          |
+| Browser driver   | Selenium 4.21.0 — **built-in Selenium Manager** (no WebDriverManager) |
+| Runner           | TestNG 7.10.2 via `@CucumberOptions` + parallel `@DataProvider` |
+| Reporting        | Allure 2.27.0 (`allure-cucumber7-jvm`) + AspectJ 1.9.22 weaver |
+| Build            | Maven (surefire 3.2.5, allure-maven 2.12.0)                  |
+| CI               | Jenkins declarative pipeline (`Jenkinsfile`)                 |
+
+---
+
+## Project layout
+
+```
+orangehrm-cucumber-framework/
+├── pom.xml
+├── testng.xml
+├── Jenkinsfile
+├── src
+│   ├── main/java/com/orangehrm
+│   │   ├── config/ConfigReader.java        # config.properties + -D overrides
+│   │   ├── driver/DriverFactory.java       # chrome/firefox/edge via Selenium Manager
+│   │   ├── driver/DriverManager.java       # ThreadLocal<WebDriver> (parallel-safe)
+│   │   ├── pages/                          # Page Objects (oxd- locators)
+│   │   └── utils/                          # WaitUtils, ScreenshotUtils
+│   └── test
+│       ├── java/com/orangehrm
+│       │   ├── hooks/Hooks.java            # driver lifecycle + failure screenshots
+│       │   ├── runners/TestRunner.java     # @CucumberOptions glue
+│       │   └── stepdefinitions/            # step glue (one class per module)
+│       └── resources
+│           ├── features/                   # 8 .feature files, 40 scenarios
+│           ├── config/config.properties
+│           └── allure.properties
+```
+
+---
+
+## Prerequisites
+
+- **JDK 17+** (`java -version`)
+- **Maven 3.8+** (`mvn -version`)
+- A real **browser** installed (Chrome/Firefox/Edge). Selenium Manager auto-resolves the matching driver — no manual download.
+- **Allure CLI** (optional, for `allure serve`): https://allurereport.org/docs/install/
+- Internet access to the OrangeHRM demo site.
+
+---
+
+## Running the tests
+
+From the project root:
+
+```bash
+mvn clean test
+```
+
+### Useful overrides (any `config.properties` value works as `-D`)
+
+```bash
+# Headless run on Firefox
+mvn clean test -Dbrowser=firefox -Dheadless=true
+
+# Run scenarios in parallel (3 threads)
+mvn clean test -Ddataproviderthreadcount=3
+
+# Different browser + headless + parallel together
+mvn clean test -Dbrowser=chrome -Dheadless=true -Ddataproviderthreadcount=3
+```
+
+### Tag filtering (Cucumber)
+
+```bash
+# Only the login feature
+mvn clean test -Dcucumber.filter.tags="@login"
+
+# Everything EXCEPT write operations (recommended on the shared public demo)
+mvn clean test -Dcucumber.filter.tags="not @write"
+
+# Smoke subset
+mvn clean test -Dcucumber.filter.tags="@smoke"
+```
+
+> **About `@write` scenarios:** A few scenarios (add employee, add candidate, etc.) create
+> records on the **shared** public demo. They are tagged `@write` so you can exclude them with
+> `-Dcucumber.filter.tags="not @write"` if the demo data has drifted or another user is mid-test.
+
+---
+
+## Allure report
+
+```bash
+# Option A — Maven plugin (serves on a local port)
+mvn allure:serve
+
+# Option B — Allure CLI against the raw results
+allure serve target/allure-results
+
+# Option C — generate a static site
+allure generate target/allure-results --clean -o target/allure-report
+```
+
+Failure screenshots are auto-attached to the Allure report by the `@After` hook.
+
+---
+
+## What's covered (40 scenarios across 8 features)
+
+| Feature              | Scenarios | Highlights                                                        |
+|----------------------|-----------|-------------------------------------------------------------------|
+| `login.feature`      | 8         | valid login, 3× invalid (outline), empty username/password, forgot-password, logout |
+| `navigation.feature` | 12        | every main-menu module routes to the correct URL (outline)        |
+| `dashboard.feature`  | 3         | widgets present, quick-launch shortcuts, user account menu        |
+| `admin.feature`      | 4         | search user, role-filter options, filter by role, reset           |
+| `pim.feature`        | 4         | employee list, search, reset, **@write** add employee             |
+| `leave.feature`      | 3         | Apply Leave page, leave-type options, My Leave list               |
+| `recruitment.feature`| 3         | candidates list, **@write** filter by status, **@write** add candidate |
+| `directory.feature`  | 3         | directory cards, filter by job title, reset                       |
+
+---
+
+## Jenkins
+
+The included `Jenkinsfile` is a declarative pipeline with build parameters:
+
+- `BROWSER` (chrome/firefox/edge), `HEADLESS` (true/false), `TAGS` (Cucumber filter), `THREADS`
+- Runs `mvn clean test` with those parameters
+- Publishes the Allure report and archives `target/allure-results` + `target/cucumber-reports`
+
+> **Before first run**, make sure the `tools { jdk … maven … }` names in the `Jenkinsfile`
+> match the tool installation names configured under *Manage Jenkins → Tools*, and that the
+> **Allure** Jenkins plugin is installed.
+
+---
+
+## Notes on locators
+
+Page objects target OrangeHRM's Angular-style `oxd-` classes and label-driven inputs
+(e.g. typing into a field by its visible label, selecting from `oxd-` dropdowns, waiting for
+the loader spinner to disappear). Result assertions are deliberately **count-agnostic**
+(they check for the presence of a results summary rather than a hard-coded row count) so they
+stay green even as the shared demo's data changes.

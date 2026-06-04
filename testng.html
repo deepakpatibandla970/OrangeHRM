@@ -1,0 +1,15 @@
+<!--
+    data-provider-thread-count controls how many scenarios run in parallel.
+    It is set to 1 here for a maximally stable first run against the shared
+    public demo site. The ThreadLocal driver is parallel-safe, so you can
+    raise this (e.g. 3) once you have confirmed a green run:
+        mvn test -Ddataproviderthreadcount=3
+ -->
+
+<suite name="OrangeHRM Cucumber Suite" data-provider-thread-count="1" verbose="1">
+    <test name="OrangeHRM BDD Tests">
+        <classes>
+            <class name="com.orangehrm.runners.TestRunner"/>
+        </classes>
+    </test>
+</suite>

@@ -1,0 +1,75 @@
+// Declarative pipeline for the OrangeHRM Cucumber BDD framework.
+//
+// Jenkins prerequisites (Manage Jenkins > Tools / Plugins):
+//   - JDK 17 configured with the name used in the 'tools' block below
+//   - Maven configured with the name used in the 'tools' block below
+//   - "Allure" plugin installed, and an Allure commandline tool configured
+//   - A browser available on the agent (Chrome/Chromium) for headless runs
+//
+pipeline {
+    agent any
+
+    tools {
+        jdk   'jdk17'      // <-- match the JDK name in Manage Jenkins > Tools
+        maven 'maven3'     // <-- match the Maven name in Manage Jenkins > Tools
+    }
+
+    parameters {
+        choice(name: 'BROWSER', choices: ['chrome', 'firefox', 'edge'],
+               description: 'Browser to run the suite against')
+        booleanParam(name: 'HEADLESS', defaultValue: true,
+               description: 'Run the browser in headless mode (recommended on CI agents)')
+        string(name: 'TAGS', defaultValue: '',
+               description: 'Optional Cucumber tag filter, e.g. @smoke or "@admin or @pim"')
+        string(name: 'THREADS', defaultValue: '1',
+               description: 'Parallel scenario thread count')
+    }
+
+    options {
+        timestamps()
+        timeout(time: 60, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build & Test') {
+            steps {
+                script {
+                    def tagArg = params.TAGS?.trim() ? "-Dcucumber.filter.tags=\"${params.TAGS.trim()}\"" : ''
+                    def mvn = isUnix() ? 'mvn' : 'mvn.cmd'
+                    def cmd = """${mvn} clean test \
+                        -Dbrowser=${params.BROWSER} \
+                        -Dheadless=${params.HEADLESS} \
+                        -Ddataproviderthreadcount=${params.THREADS} \
+                        ${tagArg}"""
+                    if (isUnix()) {
+                        sh cmd
+                    } else {
+                        bat cmd
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Allure report (requires the Allure Jenkins plugin)
+            allure([
+                includeProperties: false,
+                jdk: '',
+                results: [[path: 'target/allure-results']]
+            ])
+            // Keep raw results and the native Cucumber reports as build artifacts
+            archiveArtifacts artifacts: 'target/allure-results/**, target/cucumber-reports/**',
+                             allowEmptyArchive: true, fingerprint: true
+        }
+    }
+}
+
